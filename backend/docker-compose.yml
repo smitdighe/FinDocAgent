@@ -1,0 +1,22 @@
+# Local dev database: Postgres 17 with VectorChord (vchord) preinstalled.
+# Port 5433 on the host to avoid clashing with any native Postgres.
+services:
+  db:
+    image: tensorchord/vchord-postgres:pg17-v1.1.1
+    container_name: findoc-pg
+    environment:
+      POSTGRES_USER: findoc
+      POSTGRES_PASSWORD: findoc
+      POSTGRES_DB: findoc
+    ports:
+      - "5433:5432"
+    volumes:
+      - findoc-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U findoc -d findoc"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  findoc-pgdata:

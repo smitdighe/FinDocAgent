@@ -1,0 +1,20 @@
+# python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+dist/
+build/
+*.egg-info/
+
+# tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+
+# secrets & local state
+.env
+
+# ingested filing data (raw html, pdfs, page images) — never committed
+data/
