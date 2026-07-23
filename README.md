@@ -17,7 +17,7 @@
 
 <div align="center">
 
-**FinDocAgent** is a multi-agent RAG system over SEC filings (10-K / 10-Q) built on LangGraph. Ask it a financial question — it routes the question, retrieves at the page level (visual MaxSim + lexical BM25), reads the *actual table cells*, synthesizes a cited answer, and then re-checks every numeric claim against the source cells before returning. If a figure can't be traced to a cited source, it refuses to emit it. Naive RAG chunks and embeds prose; SEC financial statements are dense HTML tables where the meaning lives in the row/column grid — chunk them and you shred the meaning, and a vanilla LLM will confidently misread or fabricate the figure. FinDocAgent is built around that failure mode.
+**FinDocAgent** is a multi-agent RAG system over SEC filings (10-K/10-Q) on LangGraph. It routes each question, retrieves at the page level (visual MaxSim + lexical BM25), reads the *actual table cells*, and re-checks every number against its source before answering — if a figure can't be traced to a cited cell, it refuses to emit it. Naive RAG chunks prose, but SEC financials are dense HTML tables where meaning lives in the row/column grid: chunk them and you shred it. FinDocAgent is built around that failure mode.
 
 </div>
 
@@ -264,6 +264,7 @@ GROQ_MODEL=openai/gpt-oss-120b
 EDGAR_USER_AGENT=FinDocAgent/0.1 (you@example.com)
 QUERY_EMBEDDING=false           # true loads ColQwen2 in the API to embed queries
 CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+IMAGE_PUBLIC_BASE_URL=          # empty = serve page JPEGs from local disk (dev)
 ```
 
 ### 3. Frontend
@@ -286,7 +287,7 @@ npm run dev
 | `POST` | `/query/sync` | Same result, non-streamed (used by the eval harness) |
 | `GET`  | `/filings` | Ingested filings + page counts |
 | `GET`  | `/filings/{id}/pages/{n}` | Page text + tables + image URL (citation-viewer contract) |
-| `GET`  | `/filings/{id}/pages/{n}/image` | The rendered page JPEG |
+| `GET`  | `/filings/{id}/pages/{n}/image` | The rendered page JPEG — streamed from local disk, or 307-redirected to object storage when `IMAGE_PUBLIC_BASE_URL` is set |
 | `POST` | `/eval/run` | Run the eval harness over the verified gold rows → `EvalRun` |
 | `GET`  | `/eval/runs` · `/eval/runs/{id}` | Eval run history + detail (regression tracking) |
 | `GET`  | `/stats` | Aggregate cost/latency + recent per-query traces |
@@ -306,6 +307,7 @@ Real issues from this build:
 - **Table bboxes stored as `NULL` + caption misdetection.** On real EDGAR filings, bounding boxes were persisting as SQL `NULL` and caption detection was misfiring. Fixed the bbox NULL storage path and caption detection against real filings (commit `f26bf8a`).
 - **Vite proxy 404s via `localhost`.** Uvicorn binds IPv4, but `localhost` resolved to `::1` first (Docker's wslrelay answered there and 404'd). Fix: proxy targets `127.0.0.1` explicitly — IPv4 is unambiguous.
 - **CORS blocked the deployed frontend.** `cors_origins` defaulted to localhost only and was never set for prod, so the Vercel frontend would have been rejected. Added a `CORS_ORIGINS` env var (comma-separated, JSON-decoding disabled so a plain list works in the dashboard) wired into config and the Render blueprint.
+- **Page images vanished in prod (ephemeral disk).** Rendered page JPEGs are written to `STORAGE_DIR` at ingest, but Render's free-tier disk is ephemeral and ingestion runs locally — so the deployed viewer 404'd every page ("image unavailable"). Fix: uploaded the images to Supabase Storage (S3-compatible, public bucket) via `scripts/upload_images.py`, and made `/filings/{id}/pages/{n}/image` 307-redirect to `IMAGE_PUBLIC_BASE_URL` (key derived from the accession, not the local path) when set — falling back to a local `FileResponse` in dev. Object storage is decoupled from the store: R2, S3, or Supabase all work.
 - **EDGAR 403s.** SEC fair-access requires a descriptive `User-Agent` with contact info. Made `EDGAR_USER_AGENT` required and throttled the client to ≤5 req/s.
 
 ---

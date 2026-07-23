@@ -77,6 +77,12 @@ Errors are RFC 7807 `application/problem+json`. `/query*` is rate limited
   extension. `render.yaml` therefore runs `tensorchord/vchord-postgres` as a
   private service with a persistent disk, and the web service points
   `DATABASE_URL` at it.
+- **Page images in prod:** Render's disk is ephemeral and ingestion runs
+  locally, so serving JPEGs from `STORAGE_DIR` fails in prod. Set
+  `IMAGE_PUBLIC_BASE_URL` to a public object-store bucket (Supabase Storage /
+  R2 / S3); the image endpoint then 307-redirects there. Seed the bucket once
+  with `scripts/upload_images.py` (S3-compatible; see its docstring for the
+  `S3_ENDPOINT_URL` / key env vars). Unset = local `FileResponse` for dev.
 - **GPU embedding:** default torch wheels here are CPU. On a CUDA box:
   `uv pip install torch --index-url https://download.pytorch.org/whl/cu126`.
 ## Eval harness (phase 4)
