@@ -1,0 +1,53 @@
+# === secrets / env ===
+.env
+.env.*
+!.env.example
+*.local
+
+# === python ===
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+build/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# === node / frontend ===
+node_modules/
+.pnp
+.pnp.js
+dist/
+dist-ssr/
+.vercel/
+
+# === models / weights / embeddings / data ===
+data/
+embeddings/
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.onnx
+*.gguf
+models/
+checkpoints/
+weights/
+
+# === logs ===
+*.log
+
+# === editor / os ===
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+.claude/
