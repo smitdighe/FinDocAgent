@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: findoc-backend
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: DATABASE_URL
+        sync: false
+      - key: SKIP_VCHORD
+        value: "true"
+      - key: QUERY_EMBEDDING
+        value: "false"
+      - key: CORS_ORIGINS
+        value: https://REPLACE-WITH-YOUR-VERCEL-DOMAIN.vercel.app
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: EDGAR_USER_AGENT
+        sync: false
+      - key: STORAGE_DIR
+        value: /tmp/findoc-data
+      # Public R2 bucket holding rendered page JPEGs; the image endpoint
+      # 307-redirects here. e.g. https://pub-xxxx.r2.dev  (no trailing slash)
+      - key: IMAGE_PUBLIC_BASE_URL
+        sync: false
+      - key: RATE_LIMIT_QUERY
+        value: 20/minute

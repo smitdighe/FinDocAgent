@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: findoc-backend
+    runtime: docker
+    rootDir: backend
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        value: https://REPLACE-WITH-YOUR-VERCEL-DOMAIN.vercel.app
+      - key: QUERY_EMBEDDING
+        value: "false"
+      - key: COLPALI_DEVICE
+        value: cpu
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: EDGAR_USER_AGENT
+        sync: false
+      - key: COLPALI_MODEL
+        value: vidore/colqwen2-v1.0
+      - key: STORAGE_DIR
+        value: /data
+      - key: RATE_LIMIT_QUERY
+        value: 20/minute
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false
+    disk:
+      name: findoc-storage
+      mountPath: /data
+      sizeGB: 20
+
+  - type: pserv
+    name: findoc-vchord
+    runtime: image
+    plan: starter
+    image:
+      url: docker.io/tensorchord/vchord-postgres:pg17-v1.1.1
+    envVars:
+      - key: POSTGRES_USER
+        value: findoc
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+      - key: POSTGRES_DB
+        value: findoc
+    disk:
+      name: findoc-pgdata
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 10
