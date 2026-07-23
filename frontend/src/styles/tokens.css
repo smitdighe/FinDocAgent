@@ -1,0 +1,32 @@
+/* Design tokens — single source of truth (spec §1, "filing room terminal").
+   Two worlds on one screen: dark operational SHELL + paper DOCUMENT viewer.
+   Do not hardcode these hex values anywhere else — reference the vars. */
+:root {
+  /* shell (dark operational world) */
+  --shell-bg: #0e0f11; /* near-black charcoal, not pure black */
+  --shell-surface: #17191c;
+  --shell-text: #e7e5e0;
+  --shell-line: #2a2d31;
+
+  /* paper (document world) */
+  --paper: #f6f3ec;
+  --paper-surface: #efebe1;
+  --ink: #1b1a17; /* text on paper */
+  --paper-line: #d8d2c2;
+
+  /* accents — strict roles, do not reuse elsewhere */
+  --stamp: #b23a2e; /* filing-stamp red: verification PASS + citation markers ONLY */
+  --caution: #c98a2c; /* ink-amber: unverified / held / failed (never red) */
+
+  /* muted shell text for secondary labels */
+  --shell-muted: #8b8f95;
+  --paper-muted: #6b665a;
+
+  /* type roles */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* motion */
+  --stamp-wipe: 260ms;
+}

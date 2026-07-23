@@ -1,0 +1,79 @@
+@import "./tokens.css";
+@import "tailwindcss";
+
+/* Map the §1 tokens into Tailwind's theme so utilities (bg-shell, text-ink,
+   font-mono, etc.) resolve to the CSS variables — tokens.css stays the single
+   source. */
+@theme inline {
+  --color-shell: var(--shell-bg);
+  --color-shell-surface: var(--shell-surface);
+  --color-shell-text: var(--shell-text);
+  --color-shell-line: var(--shell-line);
+  --color-shell-muted: var(--shell-muted);
+
+  --color-paper: var(--paper);
+  --color-paper-surface: var(--paper-surface);
+  --color-ink: var(--ink);
+  --color-paper-line: var(--paper-line);
+  --color-paper-muted: var(--paper-muted);
+
+  --color-stamp: var(--stamp);
+  --color-caution: var(--caution);
+
+  --font-display: var(--font-display);
+  --font-ui: var(--font-ui);
+  --font-mono: var(--font-mono);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--shell-bg);
+  color: var(--shell-text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Every number in the app renders in mono — enforced structurally by
+   <MonoValue>, but this class is the shared hook. */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Visible keyboard focus everywhere (a11y, spec §0). */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--stamp);
+  outline-offset: 2px;
+}
+
+/* The stamp-wipe fill for a completing trace stage. Guarded by reduced-motion. */
+@keyframes stamp-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.stamp-wipe {
+  animation: stamp-wipe var(--stamp-wipe) steps(12, end) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp-wipe {
+    animation: none;
+  }
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
